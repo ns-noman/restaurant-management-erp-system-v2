@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use Validator;
-use App\Models\User;
+use Session;
 use Gloudemans\Shoppingcart\Facades\Cart;
 // use Auth;
 use Illuminate\Support\Facades\Auth ;
@@ -110,8 +110,10 @@ class ShoppingCartController extends Controller
 
     public function cartableajax()
     {
-         return view('fontend.productscart.carttable');
+       
+        return view('fontend.productscart.carttable');
     }
+
 
 
 
@@ -174,7 +176,73 @@ class ShoppingCartController extends Controller
 
     public function showcarttable()
     {
-        return view('homepage.cartcomponents.carttable');
+        $data['companies'] = DB::connection('oracle')
+            ->table('COMPANY_INFO')
+            ->select('COMPANY_ID', 'COMPANY_CODE', 'COM_NAME')
+            ->whereIn('COMPANY_ID', [1, 3, 9])
+            ->orderBy('COM_NAME')
+            ->get();
+        $data['company_code'] = Session::get('company_code');
+        return view('homepage.cartcomponents.carttable', compact('data'));
+    }
+    
+
+    public function getTableList(Request $request)
+    {
+        // 1️⃣ Validate request
+        $validator = Validator::make($request->all(), [
+            'company_code' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 422,
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // 2️⃣ Fetch data from Oracle
+            $data['table'] = DB::connection('oracle')
+                ->table('TABLE_MS_INFO')
+                ->select(
+                    'ID',
+                    'TABLE_CODE',
+                    'TABLE_NAME',
+                    'COMPANY_CODE'
+                )
+                ->where('STATUS', 'Y')
+                ->where('COMPANY_CODE', $request->company_code)
+                ->orderBy('TABLE_NAME', 'ASC')
+                ->get();
+
+            // 3️⃣ Handle empty result
+            if ($data['table']->isEmpty()) {
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'No tables found for this company',
+                    'data'    => []
+                ], 404);
+            }
+
+            $data['selected_table_code'] = Session::get('table_code');
+
+            // 4️⃣ Success response
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Table list retrieved successfully',
+                'data'    => $data
+            ], 200);
+
+        } catch (\Exception $e) {
+            // 5️⃣ Error handling
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Something went wrong while fetching table list',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function showcartsummery()

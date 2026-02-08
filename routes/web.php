@@ -101,7 +101,8 @@ use Illuminate\Support\Facades\Route;
             ->table($tableName)
             ->select('*')
             ->where('COMPANY_CODE', 'CL-BIHQ-14062025-3')
-            // ->limit(10)
+            ->orderBy('ID', 'DESC')
+            ->limit(10)
             ->get()
             ->map(function ($row) {
                 // Convert object to array with UPPERCASE keys
@@ -138,6 +139,10 @@ use Illuminate\Support\Facades\Route;
     });
 
 
+    Route::get('/qr-scan/{company_code}/{table_code}', 'QRScanController@qrScan')->name('qr.scan');
+
+
+
 
     Route::get('/','FrontendController@index')->name('homepage');
 
@@ -150,6 +155,7 @@ use Illuminate\Support\Facades\Route;
 
     Route::get('/blogs','FrontendController@blogs')->name('blogs');
     Route::get('/blog/details/{slug}','FrontendController@blogsingle')->name('blogsingle');
+
     Route::get('/cart','FrontendController@cart')->name('cart.page');
 
     Route::post('resarvation/submit','FrontendController@reservationstore')->name('resarvation.submit');
@@ -178,6 +184,8 @@ use Illuminate\Support\Facades\Route;
     Route::post('/food/incrementCart','ShoppingCartController@update')->name('food.incrementCart');
     Route::post('/food/decrementCart','ShoppingCartController@decrementCart')->name('food.decrementCart');
     Route::post('/food/remove_cart','ShoppingCartController@remove_cart')->name('food.remove_cart');
+    
+    Route::post('/food/get-table-list','ShoppingCartController@getTableList')->name('food.get-table-list');
 
     Route::post('user/order/store','OrderController@store')->name('user.order.store');
 

@@ -1,4 +1,3 @@
-
 <div class="header-cart_title">Your Cart <span>{{ Cart::count()}} items</span></div>
     <div class="header-cart_wrap_container fl-wrap">
         <div class="box-widget-content">

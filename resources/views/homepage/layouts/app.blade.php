@@ -18,18 +18,9 @@
         <link rel="shortcut icon" href="{{ asset('home') }}/images/logo.png">
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.css" /
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.css" />
     </head>
     <body>
-        <!-- lodaer  -->
-        {{-- <div class="loader-wrap">
-            <div class="loader-item">
-                <div class="cd-loader-layer" data-frame="25">
-                    <div class="loader-layer"></div>
-                </div>
-                <span class="loader"></span>
-            </div>
-        </div> --}}
         <!-- loader end  -->
         <!-- main start  -->
         <div id="main">
@@ -284,14 +275,8 @@
                 }
 
 
-              function showcarttable()
+                function showcarttable()
                 {
-                    $.ajax({
-                        url: `{{ route('food.cartable.ajax') }}`,
-                        success: function(data) {
-                            $('.carttable').html(data);
-                        }
-                    })
                 }
               function showcartsummery()
                 {
@@ -483,6 +468,40 @@
         }
         });
 
+    </script>
+    <script>
+        $(document).ready(function(){
+            let company_code = `{{ isset($data['company_code']) ? $data['company_code'] : '' }}`;
+            if(company_code){
+                fetchTableList(company_code);
+            }
+            $('#company_code').on('change', function(){
+                var company_code = $(this).val();
+                fetchTableList(company_code);
+            });
+        });
+        function fetchTableList(company_code) {
+            $.ajax({
+                url: "{{ route('food.get-table-list') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    company_code: company_code
+                },
+                success: function (res) {
+                    var table_code = $('#table_code');
+                    table_code.empty();
+                    table_code.append('<option value="">-- Select Table --</option>');
+                    if (res.status === 200 && res.data.table.length > 0) {
+                        $.each(res.data.table, function (index, table) {
+                            table_code.append(`<option ${res.data.selected_table_code == table.table_code ? 'selected' : ''} value="${table.table_code}">${table.table_name.toUpperCase()}</option>`);
+                        });
+                    } else {
+                        table_code.append('<option value="">No table found</option>');
+                    }
+                }
+            });
+        }
     </script>
 
     </body>

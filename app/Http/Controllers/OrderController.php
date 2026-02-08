@@ -2,38 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
 use Illuminate\Http\Request;
-use Session;
 use Cart;
 use Auth;
-use App\Models\OrderDetail;
-use App\Models\Product;
 use DB;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-   
     public function store(Request $request)
     {
         if (!Auth::check()) {
@@ -46,23 +21,57 @@ class OrderController extends Controller
 
             $now = now();
 
-            // 🔹 Get next ORDER ID from Oracle sequence
+            $company_code = $request->company_code;
+            $table_code = $request->table_code;
+
+            $companyInfo = DB::connection('oracle')
+                        ->table('COMPANY_INFO')
+                        ->select('COMPANY_ID', 'COMPANY_CODE', 'BM_ID', 'COMPANY_SHORT')
+                        ->where('COMPANY_CODE', $company_code)
+                        ->first();
+
+            $taleInfo = DB::connection('oracle')
+                        ->table('TABLE_MS_INFO')
+                        ->select('*')
+                        // ->select('ID', 'BRANCH_CODE')
+                        ->where('COMPANY_CODE', $company_code)
+                        ->where('TABLE_CODE', $table_code)
+                        ->first();
+
+            $invoice_id = DB::connection('oracle')
+                        ->table('ORDERS')
+                        ->where('COMPANY_CODE', $companyInfo->company_code)
+                        ->max('INVOICE_ID') + 1;
+
+            $invoice_no = $companyInfo->company_short . '.INV.' . str_pad($invoice_id, 8, '0', STR_PAD_LEFT) . '.' . date('y');
+
+            // dd($taleInfo, $companyInfo, $invoice_id, $invoice_no);
+
+
+            if (!$taleInfo || !$companyInfo) {
+                throw new \Exception('Invalid company or table information.');
+            }
+
             $orderId = DB::connection('oracle')
-                ->selectOne("SELECT ORDERS_SEQ.NEXTVAL AS ID FROM DUAL")->id;
+                ->selectOne("SELECT  SETUP_PKG.GET_MAX_ID ('ORDERS', 'ID') AS ID FROM DUAL")->id;
 
             $order = [
-                "ID"              => $orderId, // ✅ REQUIRED for Oracle
+                "ID"              => $orderId,
                 "ORDER_DATE"      => $now->format('Y-m-d H:i:s'),
-                "STATUS"          => 'P',
-                "BRANCH_CODE"     => '00002',
-                "COMPANY_CODE"    => 'CL-BIHQ-14062025-3',
+                "INVOICE_NO"      => $invoice_no,
+                "INVOICE_ID"      => $invoice_id,
+                "STATUS"          => 'O',
+                "BRANCH_CODE"     => $taleInfo->branch_code,
+                "COMPANY_CODE"    => $companyInfo->company_code,
                 "CREATED_ON"      => $now->format('Y-m-d H:i:s'),
                 "CREATED_TIME"    => $now->format('h:i:s A'),
-                "TABLE_ID"        => 154,
+
+                "TABLE_ID"        => $taleInfo->id,
+
                 "SUBTOTAL"        => (float) str_replace(',', '', Cart::subtotal()),
                 "VAT"             => (float) str_replace(',', '', Cart::tax()),
                 "DISCOUNT"        => 0,
-                "DELIVERY_CHARGE" => 40,
+                "DELIVERY_CHARGE" => '',
                 "GRAND_TOTAL"     => (float) str_replace(',', '', Cart::total()) + 40,
                 "PAYMENT_MODE"    => 'C',
                 "SERVICE_TYPE"    => 'TW',
@@ -73,10 +82,10 @@ class OrderController extends Controller
                 "VAT_ID"          => 4,
                 "SERVICE_ID"      => 3,
                 "APP_FLAG"        => 'N',
-                "BM_ID"           => 8,
-                "COMPANY_ID"      => 3,
-                "CREATED_BY_ID"   => 137,
-                "MODIFIED_BY_ID"  => 137,
+                "BM_ID"           => $companyInfo->bm_id,
+                "COMPANY_ID"      => $companyInfo->company_id,
+                "CREATED_BY_ID"   => '',
+                "MODIFIED_BY_ID"  => '',
                 "SD_AMT"          => 0,
             ];
 
@@ -95,37 +104,45 @@ class OrderController extends Controller
                     ->first();
 
                 if (!$product) {
-                    continue; // safety check
+                    continue;
                 }
-
                 $orderDetails = [
-                    "ORDER_ID"        => $orderId, // ✅ now defined
+                    "ORDER_ID"=> $orderId,
                     "ITEM_ID"         => $product->item_id,
                     "QTY"             => $data->qty,
                     "PRICE"           => (float) $data->price,
-                    "BRANCH_CODE"     => '00002',
-                    "COMPANY_CODE"    => 'CL-BIHQ-14062025-3',
-                    "SIZE_ID"         => $product->size_id,
-                    "GIFT_ITEM"       => 'N',
-                    "VOID_ITEM"       => 'N',
-                    "STATUS"          => '0',
-                    "CUSTOMER_STATUS" => 'TW',
-                    "CREATED_ON"      => $now->format('Y-m-d H:i:s'),
-                    "CREATED_TIME"    => $now->format('h:i:s A'),
-                    "KITCHEN_ITEM"    => 'N',
-                    "RETURN_ITEM"     => 'N',
-                    "RETURN_REASON"   => '',
-                    "COMPANY_ID"      => 3,
-                    "BM_ID"           => 8,
-                    "REMARKS"         => 'Nowab Shorif Test',
+                    "BRANCH_CODE"     => $taleInfo->branch_code,
+                    "COMPANY_CODE"    => $companyInfo->company_code,
+                    "STATUS"=> '0',
+                    "CREATED_BY"=> Auth::id(),
+                    "CREATED_ON"=> $now->format('Y-m-d H:i:s'),
+                    "CREATED_TIME"=> $now->format('h:i:s A'),
+                    "MODIFIED_BY"=> Auth::id(),
+                    "MODIFIED_ON"=> $now->format('Y-m-d H:i:s'),
+                    "MODIFIED_TIME"=> $now->format('h:i:s A'),
+                    "SIZE_ID"=> $product->size_id,
+                    "GIFT_ITEM"=> 'N',
+                    "VOID_ITEM"=> 'N',
+                    "RETURN_ITEM"=> 'N',
+                    "RETURN_REASON"=> '',
+                    "PICKUP_ON"=> null,
+                    "COMPANY_ID"=> $companyInfo->company_id,
+                    "BM_ID"=> $companyInfo->bm_id,
+                    "CREATED_BY_ID"=> Auth::id(),
+                    "MODIFIED_BY_ID"=> Auth::id(),
+                    "REMARKS"=> 'Nowab Shorif Test',
                 ];
-
                 DB::connection('oracle')
-                    ->table('ORDER_DETAILS')
+                    ->table('ORDER_DTL_TEMP')
                     ->insert($orderDetails);
             }
 
-            // cart::destroy();
+            DB::connection('oracle')
+                        ->table('TABLE_MS_INFO')
+                        ->where('ID', $taleInfo->id)
+                        ->update(['ACTIVITY_LOG' => 'S']);
+
+            cart::destroy();
 
             DB::connection('oracle')->commit();
 
@@ -142,49 +159,4 @@ class OrderController extends Controller
         }
     }
 
-
-        /**
-         * Display the specified resource.
-         *
-         * @param  \App\Models\Order  $order
-         * @return \Illuminate\Http\Response
-         */
-        public function show(Order $order)
-        {
-            //
-        }
-
-        /**
-         * Show the form for editing the specified resource.
-         *
-         * @param  \App\Models\Order  $order
-         * @return \Illuminate\Http\Response
-         */
-        public function edit(Order $order)
-        {
-            //
-        }
-
-        /**
-         * Update the specified resource in storage.
-         *
-         * @param  \Illuminate\Http\Request  $request
-         * @param  \App\Models\Order  $order
-         * @return \Illuminate\Http\Response
-         */
-        public function update(Request $request, Order $order)
-        {
-            //
-        }
-
-        /**
-         * Remove the specified resource from storage.
-         *
-         * @param  \App\Models\Order  $order
-         * @return \Illuminate\Http\Response
-         */
-        public function destroy(Order $order)
-        {
-            //
-        }
-    }
+}

@@ -188,7 +188,7 @@
                             <div class="images-collage-item col_par" style="width:120px" data-position-left="83" data-position-top="87" data-zindex="1" data-scrollax="properties: { translateY: '150px' }"><img src="{{ asset('home') }}/images/cube.png" alt=""></div>
                         </div>
                         <div class="section-bg">
-                            <div class="bg"  data-bg="{{ asset('home') }}/images/bg/dec/section-bg.png"></div>
+                            {{-- <div class="bg"  data-bg="{{ asset('home') }}/images/bg/dec/section-bg.png"></div> --}}
                         </div>
                     </section>
                     <!--  section end  -->
@@ -258,9 +258,9 @@
                             <div class="bold-separator bold-separator_dark"><span></span></div>
 
                         </div>
-                        <div class="section-bg">
+                        {{-- <div class="section-bg">
                             <div class="bg" data-bg="images/bg/dec/section-bg.png" style="background-image: url(&quot;images/bg/dec/section-bg.png&quot;);"></div>
-                        </div>
+                        </div> --}}
                     </section>
                     <!-- section end  -->
                 </div>

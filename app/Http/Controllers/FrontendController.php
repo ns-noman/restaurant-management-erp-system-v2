@@ -12,31 +12,21 @@ use App\Models\ProductCategory;
 use App\Models\OrderDetail;
 use App\Models\Order;
 use Auth;
+use Session;
 
 class FrontendController extends Controller
 {
-
-
-
     public function userdashboard()
     {
         $data['orders'] = Order::where('user_id',Auth::user()->id)->latest()->get();
         return view('userdashboard',$data);
     }
-
-
-
-
-
-
-
     public function index()
     {
         $data['products']   = Product::WhereNull('deleted_at')->latest()->get();
         $data['categories'] = ProductCategory::WhereNull('deleted_at')->limit(9)->get();
         return view('homepage.pages.index',$data);
     }
-
     public function menu($company='woodenspoon')
     {
         $company_ids = ['woodenspoon'=>1,'deshibites'=>9];
@@ -66,14 +56,16 @@ class FrontendController extends Controller
         }
         return view('homepage.pages.menu',$data);
     }
-
-
-
     public function cart(){
-        return view('homepage.pages.cartpage');
+        $data['companies'] = DB::connection('oracle')
+            ->table('COMPANY_INFO')
+            ->select('COMPANY_ID', 'COMPANY_CODE', 'COM_NAME')
+            ->whereIn('COMPANY_ID', [1, 3, 9])
+            ->orderBy('COM_NAME')
+            ->get();
+        $data['company_code'] = Session::get('company_code');
+        return view('homepage.pages.cartpage', compact('data'));
     }
-
-
 
     public function about(){
 
