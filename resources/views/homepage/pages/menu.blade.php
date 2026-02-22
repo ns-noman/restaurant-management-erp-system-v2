@@ -37,20 +37,21 @@
                             <div class="gallery-items grid-big-pad  lightgallery three-column fl-wrap" style="margin-bottom: 50px; position: relative; height: 1363.5px;">
                                 @foreach ($categories  as $key => $category)
                                   @foreach ($category->food as $food)
+                                    @php
+                                        $imgUrl = $food->image == 'http://123.200.18.157:8889/' ? asset('images/food-placeholder.png') : $food->image;
+                                    @endphp
                                     <!-- gallery-item-->
                                     <div class="gallery-item {{ $food->category_id  }}" style="position: absolute; left: 0px; top: 0px;display: {{ $key == '0' ? 'block' : '' }}">
                                         <div class="grid-item-holder hov_zoom">
-                                            {{-- <a href="{{ asset('images') }}/{{$food->image }}" class="box-media-zoom   popup-image"><i class="fal fa-search"></i></a>
-                                            <img src="{{ asset('images') }}/{{$food->image }}" alt=""> --}}
-                                            <a href="{{ $food->image }}" class="box-media-zoom   popup-image"><i class="fal fa-search"></i></a>
-                                            <img src="{{ $food->image }}" alt="">
+                                            <a href="{{ $imgUrl }}" class="box-media-zoom   popup-image"><i class="fal fa-search"></i></a>
+                                            <img src="{{ $imgUrl }}" alt="">
                                         </div>
                                         <div class="grid-item-details">
                                             <h3>{{$food->name }}</h3>
                                             <p>{{$food->description }}</p>
                                             <div class="grid-item_price">
-                                                <span>TK {{$food->price }}</span>
-                                                <div class="add_cart add_to_cart" data-id="{{ $food->id }}">Add To Cart</div>
+                                                <span style="font-size: 18px!important;">TK {{$food->price }}</span>
+                                                <div style="font-size: 11px!important; padding: 5px 5px;" class="add_cart add_to_cart" data-id="{{ $food->id }}">Add To Cart</div>
                                             </div>
                                         </div>
                                     </div>

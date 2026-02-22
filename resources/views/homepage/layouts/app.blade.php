@@ -252,7 +252,63 @@
                 showcartsummery();
               });
 
-                  // cart script
+
+            function loadCartData()
+            {
+                $.ajax({
+                    url: `{{ route('food.cart.load-data.ajax') }}`,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $('#cart-items-count').text(data.count + ' items');
+                        let html = ``;
+                        if (data.cart_items.length === 0) {
+                            html += `
+                                <tr>
+                                    <td colspan="6" class="text-center">Cart is empty</td>
+                                </tr>
+                            `;
+                        } else {
+                            $.each(data.cart_items, function (key, item) {
+                                
+                                let img = item.image ? `<img src="${item.image}" class="respimg">` : '';
+                                console.log(item.image, img);
+                                html += `
+                                    <tr>
+                                        <td>
+                                            <a href="#">${img}</a>
+                                        </td>
+                                        <td>
+                                            <h5 class="product-name">${item.name}</h5>
+                                        </td>
+                                        <td>
+                                            <h5 class="order-money">${item.price} tk</h5>
+                                        </td>
+                                        <td class="quentity-product">
+                                            <button class="incrementCart" data-id="${item.rowId}">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                            <span>${item.qty}</span>
+                                            <button class="decrementCart" data-id="${item.rowId}">
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <h5 class="order-money">${item.total} tk</h5>
+                                        </td>
+                                        <td class="pr-remove">
+                                            <a href="#" class="removecart" data-id="${item.rowId}">
+                                                <i class="fal fa-times"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                        }
+                        $('#cart-table-body').html(html);
+                    }
+                });
+            }
 
 
               function showcartcount()
@@ -331,11 +387,11 @@
                             rowId
                         },
                         success: function(data){
-                            console.log(data)
                                 showcartcount();
                                 showcarthover();
                                 showcarttable();
                                 showcartsummery();
+                                loadCartData();
                         },
                         error: function(data) {
                             console.log('Error:', data);
@@ -413,6 +469,7 @@
                     showcarthover();
                     showcarttable();
                     showcartsummery();
+                    loadCartData();
                 },
                 error: function(data) {
                     console.log('Error:', data);
@@ -436,6 +493,7 @@
                     showcarthover();
                     showcarttable();
                     showcartsummery();
+                    loadCartData();
                 },
                 error: function(data) {
                     console.log('Error:', data);
@@ -503,6 +561,7 @@
             });
         }
     </script>
+    @yield('scripts')
 
     </body>
 </html>

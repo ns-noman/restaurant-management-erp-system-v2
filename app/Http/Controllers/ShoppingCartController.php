@@ -14,45 +14,32 @@ use Illuminate\Support\Facades\DB;
 
 class ShoppingCartController extends Controller
 {
-
-
-
     public function store(Request $request)
     {
-
         $input = $request->all();
-
-        // $product = Product::find($request->food_id);
-
         $product = DB::connection('oracle')
             ->table('RECIPE_INFO')
             ->join('ITEMS', 'ITEMS.ID', '=', 'RECIPE_INFO.ITEM_ID')
             ->select('RECIPE_INFO.ID as id', 'ITEMS.ITEM_NAME as name', 'RECIPE_INFO.RECIPE_DESC as description', 'RECIPE_INFO.PRICE as price','RECIPE_INFO.AFTER_DIS_PRICE as discount_price', 'RECIPE_INFO.DIS_FLAG as discount_flag', 'RECIPE_INFO.CAT_ID as category_id', 'RECIPE_INFO.STATUS as status', DB::raw("CONCAT('http://123.200.18.157:8889/', ITEMS.ITEM_IMAGE_PATH) as image"))
             ->where(['RECIPE_INFO.ID' => $request->food_id, 'RECIPE_INFO.STATUS' => 'Y'])
             ->first();
-
         $data['qty']    = 1;
         $data['id']     = $request->food_id;
         $data['name']   = $product->name;
+      
 
         if($product->discount_flag==1){
             $data['price'] = $product->discount_price;
         }else{
             $data['price'] = $product->price;
         }
-
         $data['weight'] = '1';
-
-        $data['options']['image'] = $product->image;
-
+        $data['options']['image'] = $product->image == 'http://123.200.18.157:8889/' ? null : $product->image;
         Cart::add($data);
-
-
+        dd(Cart::content()->rowId);
+        //   Cart::setTax($data['id'], 21);
         return response()->JSON();
-
     }
-
-
 
     public function storesingle(Request $request)
     {
@@ -184,6 +171,31 @@ class ShoppingCartController extends Controller
             ->get();
         $data['company_code'] = Session::get('company_code');
         return view('homepage.cartcomponents.carttable', compact('data'));
+    }
+
+    public function loadCartData()
+    {
+
+        $cart = Cart::content()->map(function ($item) {
+            return [
+                'rowId'   => $item->rowId,
+                'id'      => $item->id,
+                'name'    => $item->name,
+                'price'   => $item->price,
+                'qty'     => $item->qty,
+                'subtotal'=> $item->subtotal(),
+                'total'   => $item->total(),
+                'image'   => $item->options['image'],
+            ];
+        });
+
+        return response()->json([
+            'cart_items' => $cart,
+            'count'      => Cart::count(),
+            'subtotal'   => Cart::subtotal(),
+            'tax'        => Cart::tax(),
+            'total'      => Cart::total(),
+        ]);
     }
     
 

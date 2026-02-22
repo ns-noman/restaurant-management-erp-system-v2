@@ -18,7 +18,34 @@ class FrontendController extends Controller
 {
     public function userdashboard()
     {
-        $data['orders'] = Order::where('user_id',Auth::user()->id)->latest()->get();
+        $data['orders'] = DB::connection('oracle')->table('ORDERS')->where('CUSTOMER_ID', Auth::id())->get();
+        $data['orders'] = $data['orders'] ? $data['orders']->toArray() : [];
+        
+        foreach($data['orders'] as $key => $order){
+            $details = DB::connection('oracle')
+                ->table('ORDER_DTL as odt')
+                ->join('ITEMS as i', 'i.ID', '=', 'odt.ITEM_ID')
+                ->select(
+                    'odt.*',
+                    'i.ITEM_NAME as item_name'
+                )
+                ->where('odt.ORDER_ID', $order->id)
+                ->get()
+                ->toArray();
+            if(count($details) == 0){
+                $details = DB::connection('oracle')
+                    ->table('ORDER_DTL_TEMP as odt')
+                    ->join('ITEMS as i', 'i.ID', '=', 'odt.ITEM_ID')
+                    ->select(
+                        'odt.*',
+                        'i.ITEM_NAME as item_name'
+                    )
+                    ->where('odt.ORDER_ID', $order->id)
+                    ->get()
+                    ->toArray();
+            }
+            $data['orders'][$key]->details = count($details) ? $details : [];
+        }
         return view('userdashboard',$data);
     }
     public function index()
@@ -39,7 +66,6 @@ class FrontendController extends Controller
             $company='woodenspoon';
         }
         $company_id = $company_ids[$company];
-
         // $data['categories'] = ProductCategory::WhereNull('deleted_at')->get(); Old
         $data['categories'] = DB::connection('oracle')
             ->table('CATEGORIES')

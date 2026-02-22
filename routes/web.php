@@ -100,7 +100,8 @@ use Illuminate\Support\Facades\Route;
         $records = DB::connection('oracle')
             ->table($tableName)
             ->select('*')
-            ->where('COMPANY_CODE', 'CL-BIHQ-14062025-3')
+            // ->where('COMPANY_CODE', operator: 'DES-11122025-9')
+            // ->where('ORDER_ID', '208062')
             ->orderBy('ID', 'DESC')
             ->limit(10)
             ->get()
@@ -166,7 +167,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
-  /* ================= product shopping cart  ==================================*/
+    /* ================= product shopping cart  ==================================*/
     Route::post('food/add_to_cart', 'ShoppingCartController@store')->name('food.add_to_cart');
     Route::post('food/addtocart', 'ShoppingCartController@storesingle')->name('food.single.cart');
     Route::post('food/cart_update', 'ShoppingCartController@update');
@@ -174,9 +175,9 @@ use Illuminate\Support\Facades\Route;
     Route::post('food/cart/item/destroy/', 'ShoppingCartController@destroy')->name('product.cart.destroy');
 
 
-     //for ajax call
-
+    //for ajax call
     Route::get('/food/shopping/cart/count/ajax','ShoppingCartController@showcartcount')->name('food.cart.count.ajax');
+    Route::get('/food/shopping/cart/load-cart-data/ajax','ShoppingCartController@loadCartData')->name('food.cart.load-data.ajax');
     Route::get('/food/shopping/cart/hover/ajax','ShoppingCartController@showcarthover')->name('food.cart.hover.ajax');
 
     Route::get('/food/carttable/ajax','ShoppingCartController@showcarttable')->name('food.cartable.ajax');

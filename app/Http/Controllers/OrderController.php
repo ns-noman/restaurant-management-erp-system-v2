@@ -23,6 +23,20 @@ class OrderController extends Controller
 
             $company_code = $request->company_code;
             $table_code = $request->table_code;
+            $delivery_charge = 0;
+            $discount = 0;
+            $subtotal = (float) str_replace(',', '', Cart::subtotal());
+            $vat = $taleInfo = DB::connection('oracle')
+                        ->table('COM_VATS')
+                        ->where('COMPANY_CODE', $company_code)
+                        ->first();
+            $service = $taleInfo = DB::connection('oracle')
+                        ->table('COM_SERVICE_CHARGES')
+                        ->where('COMPANY_CODE', $company_code)
+                        ->first();
+            $service_charge = (float) $subtotal * ($service->service_perc / 100);
+            $vat_amount = (float) $subtotal * ($vat->vat_perc / 100);
+            $grand_total = $subtotal + $vat_amount + $service_charge - $discount;
 
             $companyInfo = DB::connection('oracle')
                         ->table('COMPANY_INFO')
@@ -33,7 +47,6 @@ class OrderController extends Controller
             $taleInfo = DB::connection('oracle')
                         ->table('TABLE_MS_INFO')
                         ->select('*')
-                        // ->select('ID', 'BRANCH_CODE')
                         ->where('COMPANY_CODE', $company_code)
                         ->where('TABLE_CODE', $table_code)
                         ->first();
@@ -45,9 +58,6 @@ class OrderController extends Controller
 
             $invoice_no = $companyInfo->company_short . '.INV.' . str_pad($invoice_id, 8, '0', STR_PAD_LEFT) . '.' . date('y');
 
-            // dd($taleInfo, $companyInfo, $invoice_id, $invoice_no);
-
-
             if (!$taleInfo || !$companyInfo) {
                 throw new \Exception('Invalid company or table information.');
             }
@@ -57,6 +67,7 @@ class OrderController extends Controller
 
             $order = [
                 "ID"              => $orderId,
+                "CUSTOMER_ID"     => Auth::id(),
                 "ORDER_DATE"      => $now->format('Y-m-d H:i:s'),
                 "INVOICE_NO"      => $invoice_no,
                 "INVOICE_ID"      => $invoice_id,
@@ -65,22 +76,20 @@ class OrderController extends Controller
                 "COMPANY_CODE"    => $companyInfo->company_code,
                 "CREATED_ON"      => $now->format('Y-m-d H:i:s'),
                 "CREATED_TIME"    => $now->format('h:i:s A'),
-
                 "TABLE_ID"        => $taleInfo->id,
-
-                "SUBTOTAL"        => (float) str_replace(',', '', Cart::subtotal()),
-                "VAT"             => (float) str_replace(',', '', Cart::tax()),
-                "DISCOUNT"        => 0,
-                "DELIVERY_CHARGE" => '',
-                "GRAND_TOTAL"     => (float) str_replace(',', '', Cart::total()) + 40,
+                "SUBTOTAL"        => $subtotal,
+                "VAT"             => $vat_amount,
+                "DISCOUNT"        => $discount,
+                "DELIVERY_CHARGE" => $delivery_charge,
+                "GRAND_TOTAL"     => $grand_total,
                 "PAYMENT_MODE"    => 'C',
                 "SERVICE_TYPE"    => 'TW',
                 "ACCESS_MODE"     => 'N',
                 "WORK_PERIOD_ID"  => null,
                 "VOID_STATUS"     => 'N',
                 "PAYMENT_STATUS"  => 'D',
-                "VAT_ID"          => 4,
-                "SERVICE_ID"      => 3,
+                "VAT_ID"          => $vat->id,
+                "SERVICE_ID"      => $service->id,
                 "APP_FLAG"        => 'N',
                 "BM_ID"           => $companyInfo->bm_id,
                 "COMPANY_ID"      => $companyInfo->company_id,
@@ -140,7 +149,7 @@ class OrderController extends Controller
             DB::connection('oracle')
                         ->table('TABLE_MS_INFO')
                         ->where('ID', $taleInfo->id)
-                        ->update(['ACTIVITY_LOG' => 'S']);
+                        ->update(['ACTIVITY_LOG' => 'N']);
 
             cart::destroy();
 

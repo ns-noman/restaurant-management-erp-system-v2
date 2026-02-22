@@ -54,13 +54,13 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                @foreach ($order->orderdetail as $orderdetail)
+                                                                @foreach ($order->details as $orderdetail)
                                                                     <tr>
                                                                         <td>{{ $loop->iteration }}</td>
-                                                                        <td>{{ $orderdetail->food?$orderdetail->food->name:'' }}</td>
+                                                                        <td>{{ $orderdetail->item_name }}</td>
                                                                         <td>{{ $orderdetail->price  }}</td>
                                                                         <td>{{ $orderdetail->qty  }}</td>
-                                                                        <td>{{ $orderdetail->total  }}</td>
+                                                                        <td>{{ $orderdetail->price * $orderdetail->qty }}</td>
                                                                      </tr>
                                                                 @endforeach
                                                                 </tbody>
@@ -74,24 +74,27 @@
                                                             {{  $order->vat }}
                                                         </td>
                                                         <td>
-                                                            {{ $order->shipping }}
+                                                            {{-- {{ $order->shipping }} --}}
                                                         </td>
                                                         <td>
-                                                            {{ $order->total }}
+                                                            {{ $order->grand_total }}
                                                         </td>
 
                                                         <td>
-                                                            @if($order->payment_status==1)
+                                                            @if($order->payment_status=='D')
                                                              Due
-                                                            @elseif($order->payment_status==2)
+                                                            @elseif($order->payment_status=='P')
                                                              Paid
-
                                                             @endif
                                                         </td>
 
                                                         <td>
-                                                            @if ($order->status == 0)
-                                                                <span class="btn btn-danger status-btn ">Cancel</span>
+                                                            @if ($order->status == 'O' || $order->status == 'N')
+                                                            <span class="btn btn-danger status-btn ">Pending</span>
+                                                            @elseif($order->status == 'P')
+                                                            <span class="btn btn-success status-btn">Processing</span>
+                                                            @elseif ($order->status == 0)
+                                                            <span class="btn btn-danger status-btn ">Cancel</span>
                                                             @elseif($order->status == 1)
                                                             <span class="btn btn-success status-btn">Confirmed</span>
                                                             @elseif($order->status == 2)
@@ -126,8 +129,6 @@
                     </section>
                     <!--  section end  -->
                     <div class="brush-dec2 brush-dec_bottom"></div>
-
-
     </div>
 
 @endsection()

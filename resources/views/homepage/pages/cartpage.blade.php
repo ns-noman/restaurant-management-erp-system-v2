@@ -67,9 +67,9 @@
                             </div>
                         </div>
 
-                        <h4 class="cart-title">Your cart <span>{{ Cart::count() }} items</span></h4>
+                            <h4 class="cart-title">Your cart <span id="cart-items-count"> items</span></h4>
                             <table class="table table-border checkout-table">
-                                <tbody>
+                                <thead>
                                     <tr>
                                         <th>Image</th>
                                         <th>Item</th>
@@ -78,33 +78,8 @@
                                         <th>Total</th>
                                         <th></th>
                                     </tr>
-                                    @foreach (Cart::content() as $cartproduct)
-                                    <tr>
-                                        <td>
-                                            <a href="#"><img src="{{ $cartproduct->options['image']  }}" alt="" class="respimg"></a>
-                                        </td>
-                                        <td>
-                                            <h5 class="product-name">{{ $cartproduct->name  }}</h5>
-                                        </td>
-                                        <td>
-                                            <h5 class="order-money">{{ $cartproduct->price }} tk</h5>
-                                        </td>
-                                        <td>
-                                            <input type="number" name="cartin1" value="{{ $cartproduct->qty }}" max="50" min="1" class="order-count">
-                                        </td>
-                                        <td class="quentity-product">
-                                            <button class="incrementCart" data-id="{{$cartproduct->rowId}}"><i class="fa fa-plus"></i></button>
-                                            <span  class=""> {{ $cartproduct->qty }} </span>
-                                            <button class="decrementCart" data-id="{{$cartproduct->rowId}}"><i class="fa fa-minus"></i></button>
-                                        </td>
-                                        <td>
-                                            <h5 class="order-money">{{ $cartproduct->total() }} tk </h5>
-                                        </td>
-                                        <td class="pr-remove">
-                                            <a href="" title="Remove" class="removecart" data-id="{{ $cartproduct->rowId }}"><i class="fal fa-times"></i></a>
-                                        </td>
-                                    </tr>
-                                    @endforeach
+                                </thead>
+                                <tbody id="cart-table-body">
                                 </tbody>
                             </table>
                             <!-- COUPON -->
@@ -113,7 +88,7 @@
                                 <button type="submit" class="btn-a">Apply</button>
                                 <button type="submit" class="pull-right btn-uc">Update Cart</button>
                             </div>
-                    </div>
+                        </div>
                     <div class="col-md-4">
                         <!-- CART TOTALS  -->
                         <div class="cart-totals dark-bg fl-wrap">
@@ -132,4 +107,9 @@
     <!--  section end  -->
     <div class="brush-dec2 brush-dec_bottom"></div>
 </div>
+@endsection
+@section('scripts')
+<script>
+    loadCartData();
+</script>
 @endsection
