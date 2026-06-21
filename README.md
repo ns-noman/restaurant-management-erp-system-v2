@@ -1,64 +1,102 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# 🏭 RMS Production ERP System (Laravel)
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A full-featured Enterprise Resource Planning (ERP) system built with Laravel designed for managing production-based businesses such as food manufacturing, central kitchens, FMCG production, inventory-heavy operations, and service-integrated enterprises.
 
-## About Laravel
+This system combines Production, Inventory, HR, Payroll, Sales, Purchasing, and Accounting workflows into a single unified platform.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 🍽️ Production Management
+- Recipe creation & management
+- Production planning system
+- Raw material issuance for production
+- Production workflow tracking
 
-## Learning Laravel
+### 📦 Inventory Management
+- Item master data management
+- Real-time stock tracking
+- Stock history logs
+- Units & measurement control
+- Supplier & ledger management
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 🛒 Purchase & Procurement
+- Purchase requisition system
+- Purchase order management
+- Supplier management
+- Purchase detail tracking
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🧾 Sales & Order Management
+- Order creation & processing
+- Order details tracking
+- Payment processing
+- Collection tracking system
 
-## Laravel Sponsors
+### 👨‍💼 HR & Payroll System
+- Employee management
+- Attendance tracking & processing
+- Leave management system
+- Salary processing (temporary & final)
+- Loan & installment management
+- Employee benefits module
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### 🏢 Admin & Access Control
+- Role-based access control (RBAC)
+- User & admin management
+- Dynamic menu system
+- API authentication (Sanctum supported)
 
-### Premium Partners
+### ⚙️ System Configuration
+- Departments, designations, divisions
+- Countries & currency setup
+- Weekly holidays & holiday management
+- Category & category type system
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+---
 
-## Contributing
+## 🧱 Tech Stack
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Laravel (PHP Framework)
+- MySQL Database
+- Laravel Sanctum / Session Authentication
+- MVC Architecture
+- Blade / Bootstrap Frontend
+- REST API Support (optional)
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 📂 Modules / Tables
 
-## Security Vulnerabilities
+users, admins, roles, privileges  
+employees, departments, designations  
+attendances, attendance_processes, attendance_process_details  
+leaves, leave_types  
+recipes, recipe_details, production_plans  
+items, stock_histories, units  
+purchases, purchase_details, purchase_requisitions  
+suppliers, supplier_ledgers  
+orders, order_details, payments, payment_methods  
+loans, loan_installments  
+salary_processes, salary_process_temps  
+expenses, expense_details, expense_heads  
+categories, category_types  
+countries, divisions, currency_symbols  
+weekly_holidays, holidays  
+menus, personal_access_tokens, failed_jobs  
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## ⚙️ Installation
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+git clone https://github.com/your-username/rms-production-erp.git
+cd rms-production-erp
+composer install
+npm install
+npm run dev
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+php artisan serve
