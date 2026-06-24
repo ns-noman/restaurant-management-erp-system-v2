@@ -1,4 +1,4 @@
-# 🏭 RMS Production ERP System (Laravel)
+# 🏭 Restaurant Management ERP System (Laravel)
 
 A full-featured Enterprise Resource Planning (ERP) system built with Laravel designed for managing production-based businesses such as food manufacturing, central kitchens, FMCG production, inventory-heavy operations, and service-integrated enterprises.
 
